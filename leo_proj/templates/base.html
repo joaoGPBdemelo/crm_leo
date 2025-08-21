@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema de Gestão de Pacientes{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .card-header {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .patient-card {
+            transition: transform 0.2s;
+        }
+        .patient-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .search-box {
+            position: relative;
+        }
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        .search-result-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .search-result-item:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-heartbeat"></i> Sistema de Pacientes
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">
+                            <i class="fas fa-home"></i> Início
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('novo_paciente') }}">
+                            <i class="fas fa-user-plus"></i> Novo Paciente
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('buscar_paciente') }}">
+                            <i class="fas fa-search"></i> Buscar
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth_google') }}">
+                            <i class="fab fa-google"></i> Conectar Google Calendar
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('calendar_status') }}">
+                            <i class="fas fa-calendar-check"></i> Status Calendar
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-light mt-5 py-4">
+        <div class="container text-center">
+            <p class="text-muted">&copy; 2024 Sistema de Gestão de Pacientes</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Busca em tempo real
+        function setupLiveSearch() {
+            const searchInput = document.getElementById('liveSearch');
+            if (searchInput) {
+                let timeout = null;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => {
+                        const query = this.value.trim();
+                        if (query.length >= 2) {
+                            fetch(`/api/pacientes?q=${encodeURIComponent(query)}`)
+                                .then(response => response.json())
+                                .then(data => showSearchResults(data))
+                                .catch(error => console.error('Erro na busca:', error));
+                        } else {
+                            hideSearchResults();
+                        }
+                    }, 300);
+                });
+            }
+        }
+
+        function showSearchResults(pacientes) {
+            const resultsDiv = document.getElementById('searchResults');
+            if (!resultsDiv) return;
+
+            if (pacientes.length === 0) {
+                resultsDiv.innerHTML = '<div class="search-result-item">Nenhum paciente encontrado</div>';
+            } else {
+                resultsDiv.innerHTML = pacientes.map(p => 
+                    `<div class="search-result-item" onclick="window.location.href='/paciente/${p.id}'">
+                        <strong>${p.nome}</strong><br>
+                        <small class="text-muted">${p.telefone} - ${p.email || 'Sem email'}</small>
+                    </div>`
+                ).join('');
+            }
+            resultsDiv.style.display = 'block';
+        }
+
+        function hideSearchResults() {
+            const resultsDiv = document.getElementById('searchResults');
+            if (resultsDiv) {
+                resultsDiv.style.display = 'none';
+            }
+        }
+
+        // Fecha os resultados da busca quando clica fora
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-box')) {
+                hideSearchResults();
+            }
+        });
+
+        // Inicializa a busca ao carregar a página
+        document.addEventListener('DOMContentLoaded', setupLiveSearch);
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Novo Atendimento - {{ paciente.nome }} - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-plus-circle"></i> Novo Atendimento - {{ paciente.nome }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="data_atendimento" class="form-label">Data e Hora do Atendimento *</label>
+                                <input type="datetime-local" class="form-control" id="data_atendimento" name="data_atendimento" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="profissional" class="form-label">Profissional *</label>
+                                <input type="text" class="form-control" id="profissional" name="profissional" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="tratamento" class="form-label">Tipo de Tratamento *</label>
+                        <select class="form-control" id="tratamento" name="tratamento" required>
+                            <option value="">Selecione o tratamento...</option>
+                            <option value="Fisioterapia">Fisioterapia</option>
+                            <option value="Consulta Médica">Consulta Médica</option>
+                            <option value="Acupuntura">Acupuntura</option>
+                            <option value="Massoterapia">Massoterapia</option>
+                            <option value="Pilates">Pilates</option>
+                            <option value="RPG">RPG (Reeducação Postural Global)</option>
+                            <option value="Hidroterapia">Hidroterapia</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="tratamento_outro" style="display: none;">
+                        <label for="tratamento_customizado" class="form-label">Especifique o Tratamento</label>
+                        <input type="text" class="form-control" id="tratamento_customizado" name="tratamento_customizado" placeholder="Digite o tipo de tratamento">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observacoes" class="form-label">Observações do Atendimento</label>
+                        <textarea class="form-control" id="observacoes" name="observacoes" rows="3" placeholder="Descreva detalhes do atendimento, sintomas observados, etc."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="evolucao" class="form-label">Evolução do Paciente</label>
+                        <textarea class="form-control" id="evolucao" name="evolucao" rows="3" placeholder="Descreva a evolução, melhoras observadas, próximos passos, etc."></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="agendar_google" name="agendar_google" checked>
+                                    <label class="form-check-label" for="agendar_google">
+                                        <i class="fab fa-google"></i> Adicionar ao Google Calendar
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enviar_notificacao" name="enviar_notificacao">
+                                    <label class="form-check-label" for="enviar_notificacao">
+                                        <i class="fas fa-bell"></i> Enviar notificação por email
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Informações do Paciente:</strong><br>
+                        <strong>Telefone:</strong> {{ paciente.telefone }}<br>
+                        {% if paciente.email %}
+                            <strong>Email:</strong> {{ paciente.email }}<br>
+                        {% endif %}
+                        {% if paciente.observacoes_medicas %}
+                            <strong>Observações Médicas:</strong> {{ paciente.observacoes_medicas }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('visualizar_paciente', id=paciente.id) }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Registrar Atendimento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Controla a exibição do campo de tratamento customizado
+        const tratamentoSelect = document.getElementById('tratamento');
+        const tratamentoOutro = document.getElementById('tratamento_outro');
+        const tratamentoCustomizado = document.getElementById('tratamento_customizado');
+
+        tratamentoSelect.addEventListener('change', function() {
+            if (this.value === 'Outros') {
+                tratamentoOutro.style.display = 'block';
+                tratamentoCustomizado.required = true;
+            } else {
+                tratamentoOutro.style.display = 'none';
+                tratamentoCustomizado.required = false;
+                tratamentoCustomizado.value = '';
+            }
+        });
+
+        // Define data atual como padrão
+        const agora = new Date();
+        const dataFormatada = agora.toISOString().slice(0, 16);
+        document.getElementById('data_atendimento').value = dataFormatada;
+    });
+</script>
+{% endblock %}

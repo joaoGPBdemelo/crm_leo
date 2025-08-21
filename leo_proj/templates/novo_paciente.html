@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Novo Paciente - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-user-plus"></i> Cadastrar Novo Paciente</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nome" class="form-label">Nome *</label>
+                                <input type="text" class="form-control" id="nome" name="nome" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="telefone" class="form-label">Telefone *</label>
+                                <input type="tel" class="form-control" id="telefone" name="telefone" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="endereco" class="form-label">Endereço</label>
+                        <textarea class="form-control" id="endereco" name="endereco" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observacoes_medicas" class="form-label">Observações Médicas</label>
+                        <textarea class="form-control" id="observacoes_medicas" name="observacoes_medicas" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Cadastrar Paciente
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
